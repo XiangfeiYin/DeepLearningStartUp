@@ -1,0 +1,448 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import os"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 80,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "import codecs"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "import nltk"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "from nltk.collocations import *"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 323,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "from collections import *"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 277,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import pandas as pd"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 224,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "import re"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 228,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "from zhon.hanzi import punctuation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 136,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "--2017-10-09 15:19:34--  https://raw.githubusercontent.com/AIHackers/DeepLearningStartUp/master/happiness_seg.txt\n",
+      "Resolving raw.githubusercontent.com... 151.101.0.133, 151.101.64.133, 151.101.128.133, ...\n",
+      "Connecting to raw.githubusercontent.com|151.101.0.133|:443... connected.\n",
+      "HTTP request sent, awaiting response... 200 OK\n",
+      "Length: 1503432 (1.4M) [text/plain]\n",
+      "Saving to: ‘happiness_seg.txt.1’\n",
+      "\n",
+      "happiness_seg.txt.1 100%[===================>]   1.43M   413KB/s    in 3.7s    \n",
+      "\n",
+      "2017-10-09 15:19:39 (392 KB/s) - ‘happiness_seg.txt.1’ saved [1503432/1503432]\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "!wget https://raw.githubusercontent.com/AIHackers/DeepLearningStartUp/master/happiness_seg.txt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 386,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "text = open('happiness_seg.txt.1').read()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 387,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "str"
+      ]
+     },
+     "execution_count": 387,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "type(text)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 388,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1503432"
+      ]
+     },
+     "execution_count": 388,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(text)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 389,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "\n",
+      "幸福之路\n",
+      "第一章 　 什么 使人 不幸\n",
+      "\n",
+      "\n",
+      "动物 只要 不患 疾病 ， 食物 充足 ， 就 会 快乐 满足 。 人 也 应该 如此 ； 然而 现实 并非 这样 ， 至少 在 大多数 情况 下 并非 这样 。 假如 你 是 不幸 的 ， 你 或许 就 会 承认 ， 自己 在 这 一方面 并 不是 个 例外 。 假如 你 是 幸福 的 ， 请 自问 一下 ， 你 的 朋友 中有 几个 是 幸福 的 。 当 你 对 自己 的 朋友 作 了 一番 评论 之后 ， 你 就 应该 学会 察言观色 之术 ， 使 自己 更 善于 感受 日常生活 中 所 遇到 的 人们 的 各种 情绪 。 布莱克 说 ：\n",
+      "\n",
+      "我见 过 的 一张 张 脸孔 ， 斑斑 懦弱 ， 点点 愁怨 。\n",
+      "\n",
+      "虽然 不幸 的 形式 多种多样 ， 但 你 却 不难 发现 ， 它 无处不在 。 上班时间 广立 繁忙 街头 ， 周末 闲暇 盘桓 通行 大道 ， 或者 良宵 时光 留连 于 歌堂 舞厅 ， 这时 ， 请 把 自我 从 灵魂 处 \n"
+     ]
+    }
+   ],
+   "source": [
+    "print text[:1000]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 390,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "text = re.sub(ur\"[%s]+\" %punctuation, \"\", text.decode(\"utf-8\")) #"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 391,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "\n",
+      "幸福之路\n",
+      "第一章  什么 使人 不幸\n",
+      "\n",
+      "\n",
+      "动物 只要 不患 疾病  食物 充足  就 会 快乐 满足  人 也 应该 如此  然而 现实 并非 这样  至少 在 大多数 情况 下 并非 这样  假\n"
+     ]
+    }
+   ],
+   "source": [
+    "print text[:100]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 392,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "text = text.split(' ')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 393,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "list"
+      ]
+     },
+     "execution_count": 393,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "type(text)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 394,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "c = Counter()\n",
+    "for i in range(0,(len(test) - 1)) :\n",
+    "    if len(text[i]) == 2 and len(text[i + 1]) == 2:\n",
+    "        bigram = text[i] + text[i + 1]\n",
+    "        c[bigram] = c[bigram] + 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 395,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "top_ten = c.most_common(10)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 396,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "df = pd.DataFrame(top_ten)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 397,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style>\n",
+       "    .dataframe thead tr:only-child th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: left;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>这种情况</td>\n",
+       "      <td>77</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>没有什么</td>\n",
+       "      <td>70</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>这个问题</td>\n",
+       "      <td>56</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>因为他们</td>\n",
+       "      <td>54</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>如果我们</td>\n",
+       "      <td>47</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>这种观点</td>\n",
+       "      <td>46</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>所有这些</td>\n",
+       "      <td>44</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>这个世界</td>\n",
+       "      <td>40</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8</th>\n",
+       "      <td>他们自己</td>\n",
+       "      <td>38</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9</th>\n",
+       "      <td>我们可以</td>\n",
+       "      <td>37</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      0   1\n",
+       "0  这种情况  77\n",
+       "1  没有什么  70\n",
+       "2  这个问题  56\n",
+       "3  因为他们  54\n",
+       "4  如果我们  47\n",
+       "5  这种观点  46\n",
+       "6  所有这些  44\n",
+       "7  这个世界  40\n",
+       "8  他们自己  38\n",
+       "9  我们可以  37"
+      ]
+     },
+     "execution_count": 397,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df"
+   ]
+  }
+ ],
+ "metadata": {
+  "anaconda-cloud": {},
+  "kernelspec": {
+   "display_name": "Python [default]",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 1
+}
